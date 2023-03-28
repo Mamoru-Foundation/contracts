@@ -23,4 +23,5 @@ jobs:
       - name: Test
         working-directory: sui_mamoru_relay
         run: |
+            chmod +x ../sui
             ../sui move test

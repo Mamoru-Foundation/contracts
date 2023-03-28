@@ -1,0 +1,26 @@
+name: Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+concurrency:
+  # cancel redundant builds on PRs (only on PR, not on branches)
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: robinraju/release-downloader@v1.7
+        with:
+          repository: "MystenLabs/sui"
+          tag: "devnet-0.29.0"
+          fileName: "sui"
+      - name: Test
+        working-directory: sui_mamoru_relay
+        run: |
+            ../sui move test

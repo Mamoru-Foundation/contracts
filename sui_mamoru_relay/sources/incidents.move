@@ -54,6 +54,12 @@ module sui_mamoru_relay::incidents {
         /// The unix timestamp in seconds when the incident was created.
         /// This field is set by Mamoru.
         created_at: u64,
+
+        /// The list of validators that reported the incident.
+        ///
+        /// NOTE: validators may report different incident payload for the same incident id.
+        /// The returned payload is the first one reported.
+        reported_by: vector<address>,
     }
 
     fun init(ctx: &mut TxContext) {
@@ -79,7 +85,8 @@ module sui_mamoru_relay::incidents {
         created_at: u64,
         ctx: &mut TxContext
     ) {
-        assert!(is_validator(validator_registry, tx_context::sender(ctx)), ESenderIsNotValidator);
+        let sender = tx_context::sender(ctx);
+        assert!(is_validator(validator_registry, sender), ESenderIsNotValidator);
 
         if (!table::contains(&incident_registry.daemons, daemon_id)) {
             table::add(&mut incident_registry.daemons, daemon_id, DaemonIncidentList {
@@ -89,13 +96,23 @@ module sui_mamoru_relay::incidents {
 
         let daemon_incident_list = table::borrow_mut(&mut incident_registry.daemons, daemon_id);
 
-        linked_table::push_back(&mut daemon_incident_list.incidents, incident_id, Incident {
-            id: incident_id,
-            severity,
-            address,
-            data,
-            created_at
-        });
+        if (linked_table::contains(&daemon_incident_list.incidents, incident_id)) {
+            let incident = linked_table::borrow_mut(&mut daemon_incident_list.incidents, incident_id);
+
+            vector::push_back(&mut incident.reported_by, sender);
+        } else {
+            let reported_by = vector::empty<address>();
+            vector::push_back(&mut reported_by, sender);
+
+            linked_table::push_back(&mut daemon_incident_list.incidents, incident_id, Incident {
+                id: incident_id,
+                severity,
+                address,
+                data,
+                created_at,
+                reported_by,
+            });
+        }
     }
 
     /// Returns `max_count` incidents for the given daemon id since the given timestamp.
@@ -173,79 +190,6 @@ module sui_mamoru_relay::incidents {
         incident.created_at >= since
     }
 
-    #[test_only]
-    fun init_test_env(admin: address, validator: address): Scenario {
-        use sui_mamoru_relay::validators::ValidatorRegistryOwnerCap;
-
-        let scenario_val = test_scenario::begin(admin);
-        let scenario = &mut scenario_val;
-
-        test_scenario::next_tx(scenario, admin);
-        {
-            let ctx = test_scenario::ctx(scenario);
-
-            init(ctx);
-            sui_mamoru_relay::validators::init_for_test(ctx);
-        };
-
-        test_scenario::next_tx(scenario, admin);
-        {
-            let cap = test_scenario::take_from_sender<ValidatorRegistryOwnerCap>(scenario);
-            let validator_registry = test_scenario::take_shared<ValidatorRegistry>(scenario);
-
-            sui_mamoru_relay::validators::register_validator(
-                &cap,
-                &mut validator_registry,
-                validator,
-            );
-
-            test_scenario::return_shared(validator_registry);
-            test_scenario::return_to_sender(scenario, cap);
-        };
-
-        scenario_val
-    }
-
-    #[test_only]
-    fun report_test_incidents(scenario: &mut test_scenario::Scenario, creator: address, amount: u64): vector<u8> {
-        use std::string;
-
-        assert!(amount > 0, 42);
-        let test_daemon_id = b"test_daemon_id";
-
-        let i = 0;
-        while ((i as u64) < amount) {
-            test_scenario::next_tx(scenario, creator);
-            {
-                let validator_registry = test_scenario::take_shared<ValidatorRegistry>(scenario);
-                let incident_registry = test_scenario::take_shared<DaemonIncidentRegistry>(scenario);
-
-                let mamoru_id = vector::empty<u8>();
-                vector::push_back(&mut mamoru_id, i);
-
-                report_incident(
-                    &validator_registry,
-                    &mut incident_registry,
-                    test_daemon_id,
-                    string::utf8(mamoru_id),
-                    IncidentSeverityInfo,
-                    string::utf8(b"cosmos"),
-                    vector::empty<u8>(),
-                    (i as u64),
-                    test_scenario::ctx(scenario),
-                );
-
-                test_scenario::return_shared(validator_registry);
-                test_scenario::return_shared(incident_registry);
-            };
-
-            i = i + 1;
-        };
-
-
-        test_daemon_id
-    }
-
     #[test]
     fun report_incident_ok_empty_state() {
         use sui::test_scenario;
@@ -253,7 +197,7 @@ module sui_mamoru_relay::incidents {
         let admin = @0xCAFE;
         let validator = @0xCAFF;
 
-        let scenario_val = init_test_env(admin, validator);
+        let scenario_val = init_test_env(admin, vector::singleton(validator));
         let scenario = &mut scenario_val;
 
         let test_daemon_id = report_test_incidents(scenario, validator, 1);
@@ -278,7 +222,7 @@ module sui_mamoru_relay::incidents {
         let admin = @0xCAFE;
         let validator = @0xCAFF;
 
-        let scenario_val = init_test_env(admin, validator);
+        let scenario_val = init_test_env(admin, vector::singleton(validator));
         let scenario = &mut scenario_val;
         let total_incidents: u64 = 3;
         let test_daemon_id = report_test_incidents(scenario, validator, total_incidents);
@@ -305,10 +249,50 @@ module sui_mamoru_relay::incidents {
         let validator = @0xCAFF;
         let not_validator = @0xCAF0;
 
-        let scenario_val = init_test_env(admin, validator);
+        let scenario_val = init_test_env(admin, vector::singleton(validator));
         let scenario = &mut scenario_val;
 
         let _ = report_test_incidents(scenario, not_validator, 1);
+
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun report_incident_ok_multiple_reporters() {
+        use sui::test_scenario;
+        use std::string;
+
+        let admin = @0xCAFE;
+        let validator1 = @0xCAFF;
+        let validator2 = @0xCAF1;
+
+        let validators = vector::empty<address>();
+        vector::push_back(&mut validators, validator1);
+        vector::push_back(&mut validators, validator2);
+
+        let scenario_val = init_test_env(admin, validators);
+        let scenario = &mut scenario_val;
+
+        let _ = report_test_incidents(scenario, validator1, 1);
+        let test_daemon_id = report_test_incidents(scenario, validator2, 1);
+
+        let incident_id = string::utf8(vector::singleton<u8>(0));
+
+        test_scenario::next_tx(scenario, admin);
+        {
+            let incident_registry = test_scenario::take_shared<DaemonIncidentRegistry>(scenario);
+
+            let incidents = table::borrow(&incident_registry.daemons, test_daemon_id);
+            assert!(linked_table::length(&incidents.incidents) == 1, 0);
+
+            let reported_incident = linked_table::borrow(&incidents.incidents, incident_id);
+
+            assert!(vector::length(&reported_incident.reported_by) == 2, 1);
+            assert!(vector::contains(&reported_incident.reported_by, &validator1), 2);
+            assert!(vector::contains(&reported_incident.reported_by, &validator2), 3);
+
+            test_scenario::return_shared(incident_registry);
+        };
 
         test_scenario::end(scenario_val);
     }
@@ -321,7 +305,7 @@ module sui_mamoru_relay::incidents {
         let validator = @0xCAFF;
         let not_validator = @0xCAF0;
 
-        let scenario_val = init_test_env(admin, validator);
+        let scenario_val = init_test_env(admin, vector::singleton(validator));
         let scenario = &mut scenario_val;
         let total_incidents: u64 = 3;
         let test_daemon_id = report_test_incidents(scenario, validator, total_incidents);
@@ -377,7 +361,7 @@ module sui_mamoru_relay::incidents {
         let validator = @0xCAFF;
         let not_validator = @0xCAF0;
 
-        let scenario_val = init_test_env(admin, validator);
+        let scenario_val = init_test_env(admin, vector::singleton(validator));
         let scenario = &mut scenario_val;
 
         test_scenario::next_tx(scenario, not_validator);
@@ -402,7 +386,7 @@ module sui_mamoru_relay::incidents {
         let validator = @0xCAFF;
         let not_validator = @0xCAF0;
 
-        let scenario_val = init_test_env(admin, validator);
+        let scenario_val = init_test_env(admin, vector::singleton(validator));
         let scenario = &mut scenario_val;
         let total_incidents: u64 = 3;
         let test_daemon_id = report_test_incidents(scenario, validator, total_incidents);
@@ -439,7 +423,7 @@ module sui_mamoru_relay::incidents {
         let validator = @0xCAFF;
         let not_validator = @0xCAF0;
 
-        let scenario_val = init_test_env(admin, validator);
+        let scenario_val = init_test_env(admin, vector::singleton(validator));
         let scenario = &mut scenario_val;
 
         test_scenario::next_tx(scenario, not_validator);
@@ -454,5 +438,84 @@ module sui_mamoru_relay::incidents {
         };
 
         test_scenario::end(scenario_val);
+    }
+
+    #[test_only]
+    fun init_test_env(admin: address, validators: vector<address>): Scenario {
+        use sui_mamoru_relay::validators::ValidatorRegistryOwnerCap;
+
+        let scenario_val = test_scenario::begin(admin);
+        let scenario = &mut scenario_val;
+
+        test_scenario::next_tx(scenario, admin);
+        {
+            let ctx = test_scenario::ctx(scenario);
+
+            init(ctx);
+            sui_mamoru_relay::validators::init_for_test(ctx);
+        };
+
+        let v = 0;
+
+        while (v < vector::length(&validators)) {
+            test_scenario::next_tx(scenario, admin);
+            {
+                let cap = test_scenario::take_from_sender<ValidatorRegistryOwnerCap>(scenario);
+                let validator_registry = test_scenario::take_shared<ValidatorRegistry>(scenario);
+
+                sui_mamoru_relay::validators::register_validator(
+                    &cap,
+                    &mut validator_registry,
+                    *vector::borrow(&validators, v)
+                );
+
+                test_scenario::return_shared(validator_registry);
+                test_scenario::return_to_sender(scenario, cap);
+            };
+
+            v = v + 1;
+        };
+
+        scenario_val
+    }
+
+    #[test_only]
+    fun report_test_incidents(scenario: &mut test_scenario::Scenario, creator: address, amount: u64): vector<u8> {
+        use std::string;
+
+        assert!(amount > 0, 42);
+        let test_daemon_id = b"test_daemon_id";
+
+        let i = 0;
+        while ((i as u64) < amount) {
+            test_scenario::next_tx(scenario, creator);
+            {
+                let validator_registry = test_scenario::take_shared<ValidatorRegistry>(scenario);
+                let incident_registry = test_scenario::take_shared<DaemonIncidentRegistry>(scenario);
+
+                let mamoru_id = vector::empty<u8>();
+                vector::push_back(&mut mamoru_id, i);
+
+                report_incident(
+                    &validator_registry,
+                    &mut incident_registry,
+                    test_daemon_id,
+                    string::utf8(mamoru_id),
+                    IncidentSeverityInfo,
+                    string::utf8(b"cosmos"),
+                    vector::empty<u8>(),
+                    (i as u64),
+                    test_scenario::ctx(scenario),
+                );
+
+                test_scenario::return_shared(validator_registry);
+                test_scenario::return_shared(incident_registry);
+            };
+
+            i = i + 1;
+        };
+
+
+        test_daemon_id
     }
 }

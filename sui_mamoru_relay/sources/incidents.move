@@ -51,7 +51,7 @@ module sui_mamoru_relay::incidents {
         /// This field is defined by a daemon.
         data: vector<u8>,
 
-        /// The unix timestamp in seconds when the incident was created.
+        /// The unix timestamp in milliseconds when the incident was created.
         /// This field is set by Mamoru.
         created_at: u64,
 
@@ -116,7 +116,7 @@ module sui_mamoru_relay::incidents {
     }
 
     /// Returns `max_count` incidents for the given daemon id since the given timestamp.
-    /// The timestamp must be a unix timestamp in seconds.
+    /// The timestamp must be a unix timestamp in milliseconds.
     /// Note: the function returns the incidents in the reverse order, so the latest incident is the first in the result.
     public fun get_incidents_since(
         incident_registry: &DaemonIncidentRegistry,
@@ -160,7 +160,7 @@ module sui_mamoru_relay::incidents {
     }
 
     /// Returns if there are any incidents for the given daemon id since the given timestamp.
-    /// The timestamp must be a unix timestamp in seconds.
+    /// The timestamp must be a unix timestamp in milliseconds.
     /// The function is cheaper then `get_incidents_since` as it doesn't need to return the actual incidents.
     public fun has_incidents_since(
         incident_registry: &DaemonIncidentRegistry,

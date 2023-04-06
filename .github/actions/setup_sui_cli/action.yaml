@@ -1,0 +1,38 @@
+# A composite action that sets up the Sui CLI
+name: Setup Sui CLI
+description: A composite action that sets up the Sui CLI
+inputs:
+  version:
+    description: The version of the Sui CLI to download
+    required: true
+  private-key:
+    description: The private key to setup for Sui Client
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Download Sui CLI
+      uses: robinraju/release-downloader@v1.7
+      with:
+        repository: "MystenLabs/sui"
+        tag: ${{ inputs.version }}
+        fileName: "sui"
+    - name: Setup Sui CLI
+      run: |
+        mv ./sui /usr/local/bin
+        chmod +x /usr/local/bin/sui
+
+    - name: Setup Sui Client
+      if: inputs.private-key != ""
+      env:
+        SUI_KEYSTORE_PATH: ~/.sui/sui_config/sui.keystore
+        SUI_RPC_URL: https://fullnode.devnet.sui.io:443
+      run: |
+        mkdir -p ~/.sui/sui_config
+        echo '["${{ inputs.private-key }}"]' > ~/.sui/sui_config/sui.keystore
+        export SUI_ACTIVE_ADDRESS=$(sui client addresses --json | jq -r ".[0][0]")
+        
+        envsubst < .github/sui_cli/client.yaml > ~/.sui/sui_config/client.yaml
+    

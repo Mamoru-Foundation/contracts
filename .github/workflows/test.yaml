@@ -15,11 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: robinraju/release-downloader@v1.7
+      - uses: ./actions/setup_sui_cli
         with:
-          repository: "MystenLabs/sui"
-          tag: "devnet-0.29.0"
-          fileName: "sui"
+          version: devnet-v0.29.0
       - name: Test
         working-directory: sui_mamoru_relay
         run: |

@@ -1,0 +1,8 @@
+keystore:
+  File: "${SUI_KEYSTORE_PATH}"
+envs:
+  - alias: current
+    rpc: "${SUI_RPC_URL}"
+    ws: ~
+active_env: current
+active_address: "${SUI_ACTIVE_ADDRESS}"

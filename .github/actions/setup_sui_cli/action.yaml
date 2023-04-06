@@ -20,11 +20,13 @@ runs:
         tag: ${{ inputs.version }}
         fileName: "sui"
     - name: Setup Sui CLI
+      shell: bash
       run: |
         mv ./sui /usr/local/bin
         chmod +x /usr/local/bin/sui
 
     - name: Setup Sui Client
+      shell: bash
       if: inputs.private-key != ""
       env:
         SUI_KEYSTORE_PATH: ~/.sui/sui_config/sui.keystore

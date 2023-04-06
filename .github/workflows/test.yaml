@@ -20,6 +20,4 @@ jobs:
           version: devnet-0.29.0
       - name: Test
         working-directory: sui_mamoru_relay
-        run: |
-            chmod +x ../sui
-            ../sui move test
+        run: sui move test

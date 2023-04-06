@@ -1,4 +1,3 @@
-# A composite action that sets up the Sui CLI
 name: Setup Sui CLI
 description: A composite action that sets up the Sui CLI
 inputs:
@@ -9,6 +8,10 @@ inputs:
     description: The private key to setup for Sui Client
     required: false
     default: ""
+  sui-rpc-url:
+    description: The RPC URL to setup for Sui Client
+    required: false
+    default: "https://fullnode.devnet.sui.io:443"
 
 runs:
   using: "composite"
@@ -30,7 +33,7 @@ runs:
       if: ${{ inputs.private-key != '' }}
       env:
         SUI_KEYSTORE_PATH: ~/.sui/sui_config/sui.keystore
-        SUI_RPC_URL: https://fullnode.devnet.sui.io:443
+        SUI_RPC_URL: ${{ inputs.sui-rpc-url }}
       run: |
         mkdir -p ~/.sui/sui_config
         echo '["${{ inputs.private-key }}"]' > ~/.sui/sui_config/sui.keystore

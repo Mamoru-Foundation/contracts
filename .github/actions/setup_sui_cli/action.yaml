@@ -27,7 +27,7 @@ runs:
 
     - name: Setup Sui Client
       shell: bash
-      if: inputs.private-key != ""
+      if: (inputs.private-key != "")
       env:
         SUI_KEYSTORE_PATH: ~/.sui/sui_config/sui.keystore
         SUI_RPC_URL: https://fullnode.devnet.sui.io:443
@@ -37,4 +37,3 @@ runs:
         export SUI_ACTIVE_ADDRESS=$(sui client addresses --json | jq -r ".[0][0]")
         
         envsubst < .github/sui_cli/client.yaml > ~/.sui/sui_config/client.yaml
-    

@@ -11,4 +11,6 @@ npx hardhat test
 REPORT_GAS=true npx hardhat test
 npx hardhat node
 npx hardhat run scripts/deploy.ts
+npx hardhat export-abi 
+abigen  --abi=abi/contracts/EthMamoruRelay.sol/EthMamoruRelay.json --pkg=incident_relay --out=contracts/EthMamoruRelay.go
 ```

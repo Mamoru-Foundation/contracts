@@ -1,0 +1,57 @@
+# Registers a VC validator in Sui Relay contract
+name: Sui Register Validator
+on:
+  workflow_dispatch:
+    inputs:
+      sui-rpc-url:
+        description: "Sui RPC URL"
+        required: true
+        default: "https://fullnode.devnet.sui.io:443"
+      cli-version:
+        description: "Sui CLI version"
+        required: true
+        default: "devnet-0.29.0"
+      validator-address:
+        description: "Validator address in Sui network"
+        required: true
+
+jobs:
+  register_validator:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install jq
+        run: sudo apt install jq -y --no-install-recommends
+
+      - uses: ./.github/actions/setup_sui_cli
+        with:
+          version: ${{ github.event.inputs.cli-version }}
+          sui-rpc-url: ${{ github.event.inputs.sui-rpc-url }}
+          private-key: ${{ secrets.SUI_MAMORU_DEPLOY_KEY }}
+          address: ${{ secrets.SUI_MAMORU_DEPLOY_ADDRESS }}
+
+      - name: Download publish output
+        uses: dawidd6/action-download-artifact@v2
+        with:
+            workflow: sui_publish.yaml
+            workflow_conclusion: success
+            check_artifacts: true
+            name: sui-publish-output
+            path: ./sui_mamoru_relay
+
+      - name: Register validator
+        working-directory: sui_mamoru_relay
+        env:
+          VALIDATOR_ADDRESS: ${{ github.event.inputs.validator-address }}
+        run: |
+          set -e
+
+          export PACKAGE_ID=$(cat sui-publish-output.json | jq -r '.packageId')
+          export VALIDATOR_REGISTRY_ID=$(cat sui-publish-output.json | jq -r '.validatorRegistryId')
+          export VALIDATOR_REGISTRY_OWNER_CAP_ID=$(cat sui-publish-output.json | jq -r '.validatorRegistryOwnerCapId')
+
+          sui client call --package ${PACKAGE_ID} --module validators --function register_validator \
+          --gas-budget 10000 \
+          --json \
+          --args ${VALIDATOR_REGISTRY_OWNER_CAP_ID} ${VALIDATOR_REGISTRY_ID} ${VALIDATOR_ADDRESS}

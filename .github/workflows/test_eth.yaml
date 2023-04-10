@@ -35,3 +35,8 @@ jobs:
         run: |
           cd eth_mamoru_relay
           npx hardhat test
+
+      - name: Export ABI
+        run: |
+          cd eth_mamoru_relay
+          npx hardhat export-abi

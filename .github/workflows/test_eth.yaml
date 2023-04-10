@@ -1,4 +1,4 @@
-name: Hardhat Test ETH
+name: ETH Hardhat Test
 
 on:
   push:

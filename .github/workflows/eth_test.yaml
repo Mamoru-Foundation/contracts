@@ -22,9 +22,8 @@ jobs:
           node-version: "16"
 
       - name: Install Dependencies
-        run: |
-          cd eth_mamoru_relay
-          npm install
+        working-directory: eth_mamoru_relay
+        run: npm install
 
       - name: Compile Contracts and Export ABI
         run: |

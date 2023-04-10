@@ -30,19 +30,19 @@ contract EthMamoruRelay is Ownable {
     event ValidatorRemoved(address indexed validator);
     event IncidentReported(string indexed daemonId, string indexed incidentId);
 
-    function addValidator(address validator) public onlyOwner {
+    function addValidator(address validator) external onlyOwner {
         validators[validator] = true;
         emit ValidatorAdded(validator);
         //console.log("Validator added: %s", validator);
     }
 
-    function removeValidator(address validator) public onlyOwner {
+    function removeValidator(address validator) external onlyOwner {
         delete validators[validator];
         emit ValidatorRemoved(validator);
         //console.log("Validator removed: %s", validator);
     }
 
-    function addIncident(string memory daemonId, Incident memory incident) public {
+    function addIncident(string memory daemonId, Incident memory incident) external {
         //console.log("Check validator address: %s", msg.sender);
         require(validators[msg.sender], "Only validators can report incidents.");
 

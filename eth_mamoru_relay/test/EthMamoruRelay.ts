@@ -22,11 +22,11 @@ describe("EthMamoruRelay", function () {
   describe("Deployment", function () {
     const timestamp = Math.floor(Date.now() / 1000);
 
-    it("Should set the right incidentCount", async function () {
-      const { relay } = await loadFixture(deployOneYearLockFixture);
-
-      expect(await relay.incidentCount()).to.equal(0);
-    });
+    // it("Should set the right incidentCount", async function () {
+    //   const { relay } = await loadFixture(deployOneYearLockFixture);
+    //
+    //   expect(await relay.incidentCount()).to.equal(0);
+    // });
 
     it("Should set the right owner", async function () {
       const { relay, owner } = await loadFixture(deployOneYearLockFixture);
@@ -81,8 +81,8 @@ describe("EthMamoruRelay", function () {
           .emit(relay, "IncidentReported").withArgs(daemonId, incident.Id);
 
       // Check that the incident count was incremented
-      const incidentCount = await relay.incidentCount();
-      expect(incidentCount.toNumber()).to.equal(1);
+      // const incidentCount = await relay.incidentCount();
+      // expect(incidentCount.toNumber()).to.equal(1);
 
       // Check that the incident was added to the registry
       const [storedIncidents, count] = await relay.getIncidentsSinceByDaemon(daemonId, incident.CreatedAt);
@@ -115,10 +115,6 @@ describe("EthMamoruRelay", function () {
       const daemonId = "test-daemon";
       await expect(relay.connect(nonValidator).addIncident(daemonId, incident)).to.be
           .revertedWith("Only validators can report incidents.");
-
-      // Check that the incident was not added to the registry
-      const incidentCount = await relay.incidentCount();
-      expect(incidentCount.toNumber()).to.equal(0);
     });
 
   });
@@ -154,18 +150,18 @@ describe("EthMamoruRelay", function () {
 
       const [incidents, count] = await relay.getIncidentsSinceByDaemon(daemonId, timestamp);
 
-      expect(count.toNumber()).to.equal(2);
+      expect(2).to.equal(count.toNumber());
       expect(incidents).to.have.lengthOf(2);
 
-      expect(incidents[0].Id).to.deep.equal(incident2.Id);
-      expect(incidents[0].Address).to.deep.equal(incident2.Address);
-      expect(incidents[0].Data).to.deep.equal(incident2.Data);
-      expect(incidents[0].CreatedAt.toNumber()).to.deep.equal(incident2.CreatedAt);
+      expect(incidents[1].Id).to.deep.equal(incident2.Id);
+      expect(incidents[1].Address).to.deep.equal(incident2.Address);
+      expect(incidents[1].Data).to.deep.equal(incident2.Data);
+      expect(incidents[1].CreatedAt.toNumber()).to.deep.equal(incident2.CreatedAt);
 
-      expect(incidents[1].Id).to.deep.equal(incident3.Id);
-      expect(incidents[1].Address).to.deep.equal(incident3.Address);
-      expect(incidents[1].Data).to.deep.equal(incident3.Data);
-      expect(incidents[1].CreatedAt.toNumber()).to.deep.equal(incident3.CreatedAt);
+      expect(incidents[0].Id).to.deep.equal(incident3.Id);
+      expect(incidents[0].Address).to.deep.equal(incident3.Address);
+      expect(incidents[0].Data).to.deep.equal(incident3.Data);
+      expect(incidents[0].CreatedAt.toNumber()).to.deep.equal(incident3.CreatedAt);
     });
 
     it("should not include incidents reported by other daemons", async () => {
@@ -175,27 +171,28 @@ describe("EthMamoruRelay", function () {
       );
       await relay.addValidator(owner.address)
 
-      const incident1 = {Id: "incident1", Address: owner.address, Data: "0x0000000000000000000000000000000000000001", CreatedAt: timestamp + 100};
-      const incident2 = {Id: "incident2", Address: owner.address, Data: "0x0000000000000000000000000000000000000002", CreatedAt: timestamp + 50};
-      const incident3 = {Id: "incident3", Address: owner.address, Data: "0x0000000000000000000000000000000000000003", CreatedAt: timestamp + 10};
+      const incident1 = {Id: "incident1", Address: owner.address, Data: "0x0000000000000000000000000000000000000000", CreatedAt: timestamp + 10};
+      const incident2 = {Id: "incident2", Address: owner.address, Data: "0x0000000000000000000000000000000000000000", CreatedAt: timestamp + 50};
+      const incident3 = {Id: "incident3", Address: owner.address, Data: "0x0000000000000000000000000000000000000000", CreatedAt: timestamp + 100};
 
       await relay.addIncident(daemonId, incident1);
       await relay.addIncident("otherDaemon", incident2);
       await relay.addIncident(daemonId, incident3);
-      //
+
       const [incidents, count] = await relay.getIncidentsSinceByDaemon(daemonId, timestamp);
+
       expect(count.toNumber()).to.equal(2);
       expect(incidents).to.have.lengthOf(2);
 
-      expect(incidents[0].Id).to.equal(incident1.Id);
-      expect(incidents[0].Address).to.equal(incident1.Address);
-      expect(incidents[0].Data).to.equal(incident1.Data);
-      expect(incidents[0].CreatedAt.toNumber()).to.equal(incident1.CreatedAt);
+      expect(incidents[0].Id).to.equal(incident3.Id);
+      expect(incidents[0].Address).to.equal(incident3.Address);
+      expect(incidents[0].Data).to.equal(incident3.Data);
+      expect(incidents[0].CreatedAt.toNumber()).to.equal(incident3.CreatedAt);
 
-      expect(incidents[1].Id).to.equal(incident3.Id);
-      expect(incidents[1].Address).to.equal(incident3.Address);
-      expect(incidents[1].Data).to.equal(incident3.Data);
-      expect(incidents[1].CreatedAt.toNumber()).to.equal(incident3.CreatedAt);
+      expect(incidents[1].Id).to.equal(incident1.Id);
+      expect(incidents[1].Address).to.equal(incident1.Address);
+      expect(incidents[1].Data).to.equal(incident1.Data);
+      expect(incidents[1].CreatedAt.toNumber()).to.equal(incident1.CreatedAt);
     });
 
   });

@@ -26,12 +26,10 @@ jobs:
         run: npm install
 
       - name: Compile Contracts and Export ABI
-        run: |
-          cd eth_mamoru_relay
-          npx hardhat export-abi
-#          npx hardhat compile
+        working-directory: eth_mamoru_relay
+        run: npx hardhat export-abi
+
 
       - name: Run Tests
-        run: |
-          cd eth_mamoru_relay
-          npx hardhat test
+        working-directory: eth_mamoru_relay
+        run:  npx hardhat test

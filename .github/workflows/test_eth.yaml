@@ -23,12 +23,15 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          cd eth_mamoru_relay
           npm install
 
       - name: Compile Contracts
         run: |
+          cd eth_mamoru_relay
           npx hardhat compile
 
       - name: Run Tests
         run: |
+          cd eth_mamoru_relay
           npx hardhat test

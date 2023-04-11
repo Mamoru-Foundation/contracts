@@ -1,6 +1,10 @@
-# Sample Hardhat Project
+# Ethereum Incident Relay Contracts
+This repository contains the source code for the Ethereum Incident Relay contracts.
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+The Ethereum Incident Relay contract is a contract that stores the incidents from the Validation Chain in Ethereum.
+
+This contract is based on the [OpenZeppelin](https://openzeppelin.com/) framework. 
+
 
 Try running some of the following tasks:
 

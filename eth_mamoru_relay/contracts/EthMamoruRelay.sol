@@ -65,6 +65,9 @@ contract EthMamoruRelay is Ownable {
             } else {
                 break;
             }
+            if (count == limit) {
+                break;
+            }
         }
         if (count == 0) {
             return (new Incident[](0), 0);
@@ -76,9 +79,6 @@ contract EthMamoruRelay is Ownable {
             if (daemonIncidents[daemonId][i-1].CreatedAt >= sinceTimestamp) {
                 incidents[index] = daemonIncidents[daemonId][i-1];
                 index++;
-            }
-            if (index == limit) {
-                break;
             }
         }
         //console.log("Incidents since %s: %d", sinceTimestamp, count);

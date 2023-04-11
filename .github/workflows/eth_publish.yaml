@@ -1,0 +1,63 @@
+# Deploys Eth Mamoru Relay to the specified network
+name: Eth Publish
+on:
+  workflow_dispatch:
+    inputs:
+      sui-rpc-url:
+        description: "Eth RPC URL"
+        required: true
+        default: "https://fullnode.devnet.sui.io:443"
+      cli-version:
+        description: "Sui CLI version"
+        required: true
+        default: "devnet-0.29.0"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install jq
+        run: sudo apt install jq -y --no-install-recommends
+
+      - uses: ./.github/actions/setup_sui_cli
+        with:
+          version: ${{ github.event.inputs.cli-version }}
+          sui-rpc-url: ${{ github.event.inputs.sui-rpc-url }}
+          private-key: ${{ secrets.SUI_MAMORU_DEPLOY_KEY }}
+          address: ${{ secrets.SUI_MAMORU_DEPLOY_ADDRESS }}
+
+      - name: Deploy
+        working-directory: sui_mamoru_relay
+        run: |
+          set -o pipefail
+          sui client publish --gas-budget 100000 --json | tee output.json
+
+      # this is required for calling `register_validator` in another workflow
+      - name: Parse output
+        working-directory: sui_mamoru_relay
+        run: |
+          set -e -o pipefail
+          export PACKAGE_ID=$(cat output.json | jq -r '.objectChanges[] | select (.type == "published") | .packageId')
+          export DAEMON_INCIDENT_REGISTRY_ID=$(cat output.json | jq -r '.objectChanges[] | select (.type == "created") | select(.objectType | endswith("DaemonIncidentRegistry")) | .objectId')
+          export VALIDATOR_REGISTRY_ID=$(cat output.json | jq -r '.objectChanges[] | select (.type == "created") | select(.objectType | endswith("ValidatorRegistry")) | .objectId')
+          export VALIDATOR_REGISTRY_OWNER_CAP_ID=$(cat output.json | jq -r '.objectChanges[] | select (.type == "created") | select(.objectType | endswith("ValidatorRegistryOwnerCap")) | .objectId')
+
+          export PUBLISH_OUTPUT="""
+          {
+            \"packageId\": \"$PACKAGE_ID\",
+            \"daemonIncidentRegistryId\": \"${DAEMON_INCIDENT_REGISTRY_ID}\",
+            \"validatorRegistryId\": \"${VALIDATOR_REGISTRY_ID}\",
+            \"validatorRegistryOwnerCapId\": \"${VALIDATOR_REGISTRY_OWNER_CAP_ID}\"
+          }
+          """
+
+          echo ${PUBLISH_OUTPUT} | tee sui-publish-output.json
+
+      - name: Save the output
+        uses: actions/upload-artifact@v3
+        with:
+          name: sui-publish-output
+          path: ./sui_mamoru_relay/sui-publish-output.json
+          if-no-files-found: error

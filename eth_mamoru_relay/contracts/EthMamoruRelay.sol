@@ -55,7 +55,7 @@ contract EthMamoruRelay is Ownable {
         //console.log("Incident reported: daemonId=%s, incidentId=%s count=%d", daemonId, incident.Id, incidentCount[daemonId]);
     }
 
-    function getIncidentsSinceByDaemon(string memory daemonId, uint256 sinceTimestamp, limit uint) public view returns (Incident[] memory, uint256) {
+    function getIncidentsSinceByDaemon(string memory daemonId, uint256 sinceTimestamp, uint limit) public view returns (Incident[] memory, uint256) {
         // return a list of incidents for the given daemon since the given timestamp
 
         uint256 count = 0;

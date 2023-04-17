@@ -4,7 +4,7 @@ import { ethers } from "hardhat";
 
 
 describe("EthMamoruRelay", function () {
-
+  const LIMIT = 100;
   // We define a fixture to reuse the same setup in every test.
   // We use loadFixture to run this setup once, snapshot that state,
   // and reset Hardhat Network to that snapshot in every test.
@@ -21,12 +21,6 @@ describe("EthMamoruRelay", function () {
 
   describe("Deployment", function () {
     const timestamp = Math.floor(Date.now() / 1000);
-
-    // it("Should set the right incidentCount", async function () {
-    //   const { relay } = await loadFixture(deployOneYearLockFixture);
-    //
-    //   expect(await relay.incidentCount()).to.equal(0);
-    // });
 
     it("Should set the right owner", async function () {
       const { relay, owner } = await loadFixture(deployOneYearLockFixture);
@@ -85,7 +79,7 @@ describe("EthMamoruRelay", function () {
       // expect(incidentCount.toNumber()).to.equal(1);
 
       // Check that the incident was added to the registry
-      const [storedIncidents, count] = await relay.getIncidentsSinceByDaemon(daemonId, incident.CreatedAt);
+      const [storedIncidents, count] = await relay.getIncidentsSinceByDaemon(daemonId, incident.CreatedAt, LIMIT);
 
       expect(count.toNumber()).to.equal(1);
       expect(storedIncidents).to.have.lengthOf(1);
@@ -128,7 +122,7 @@ describe("EthMamoruRelay", function () {
       const { relay} = await loadFixture(
           deployOneYearLockFixture
       );
-      const [incidents, count] = await relay.getIncidentsSinceByDaemon(daemonId, timestamp);
+      const [incidents, count] = await relay.getIncidentsSinceByDaemon(daemonId, timestamp, LIMIT);
       expect(count).to.equal(0);
       expect(incidents).to.have.lengthOf(0);
     });
@@ -148,7 +142,7 @@ describe("EthMamoruRelay", function () {
       await relay.addIncident(daemonId, incident2);
       await relay.addIncident(daemonId, incident3);
 
-      const [incidents, count] = await relay.getIncidentsSinceByDaemon(daemonId, timestamp);
+      const [incidents, count] = await relay.getIncidentsSinceByDaemon(daemonId, timestamp, LIMIT);
 
       expect(2).to.equal(count.toNumber());
       expect(incidents).to.have.lengthOf(2);
@@ -179,7 +173,7 @@ describe("EthMamoruRelay", function () {
       await relay.addIncident("otherDaemon", incident2);
       await relay.addIncident(daemonId, incident3);
 
-      const [incidents, count] = await relay.getIncidentsSinceByDaemon(daemonId, timestamp);
+      const [incidents, count] = await relay.getIncidentsSinceByDaemon(daemonId, timestamp, LIMIT);
 
       expect(count.toNumber()).to.equal(2);
       expect(incidents).to.have.lengthOf(2);

@@ -1,4 +1,4 @@
-name: Sui Test
+name: Aptos Test
 
 on:
   push:
@@ -11,13 +11,13 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  sui_test:
+  aptos_test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/setup_sui_cli
+      - uses: ./.github/actions/setup_aptos_cli
         with:
-          version: devnet-0.29.0
+          version: 1.0.11
       - name: Test
-        working-directory: sui_mamoru_relay
-        run: sui move test
+        working-directory: aptos_mamoru_relay
+        run: aptos move test

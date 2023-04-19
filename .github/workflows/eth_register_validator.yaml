@@ -10,9 +10,7 @@ name: Eth Register Validator
 #      validator-address:
 #        description: "Validator address in Eth network"
 #        required: true
-#      private-key:
-#        description: "Private key"
-#        required: true
+
 
 on:
   pull_request:
@@ -35,7 +33,8 @@ jobs:
       - name: Register validator
         working-directory: eth_mamoru_relay
         env:
-          PRIVATE_KEY: ${{ github.event.inputs.private-key }}
+          PRIVATE_KEY: ${{ secrets.ETH_MAMORU_PRIVATE_KEY }}
+        if: ${{ secrets.ETH_MAMORU_PRIVATE_KEY != '' && github.event.inputs.network != '' }}
         run: |
           export CONTRACT_ADDRESS=$(cat eth_output.txt | head -n 1)
           npx hardhat register_validator --account "${{ github.event.inputs.validator-address }}" --contract ${CONTRACT_ADDRESS} --network "${{ github.event.inputs.network }}"

@@ -21,10 +21,11 @@ jobs:
 
       - name: Deploy
         working-directory: eth_mamoru_relay
+        if: ${{ secrets.ETH_MAMORU_PRIVATE_KEY != '' && github.event.inputs.network != '' }}
         run: |
           set -e -o pipefail
-          export PRIVATE_KEY="${{ github.event.inputs.private_key }}"
-          npx hardhat run scripts/deploy.ts --network "${{ github.event.inputs.network }}" | tee eth_output.txt
+          export PRIVATE_KEY="${{ github.ETH_MAMORU_PRIVATE_KEY }}"
+          npx hardhat run scripts/deploy.ts --network ${{ github.event.inputs.network }} | tee eth_output.txt
 
       - uses: actions/upload-artifact@v3
         with:

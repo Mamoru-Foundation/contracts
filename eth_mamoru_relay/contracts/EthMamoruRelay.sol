@@ -8,9 +8,11 @@ contract EthMamoruRelay is Ownable {
 
     struct Incident {
         // define properties for an Incident
-        string Id;
+        string IncidentId;
+        string DaemonId;
         address Address;
         bytes Data;
+        int32 Severity;
         uint64 CreatedAt;
     }
 
@@ -49,7 +51,7 @@ contract EthMamoruRelay is Ownable {
         // add the incident to the registry
         daemonIncidents[daemonId][incidentCount[daemonId]] = incident;
 
-        emit IncidentReported(daemonId, incident.Id);
+        emit IncidentReported(daemonId, incident.IncidentId);
 
         incidentCount[daemonId]++;
         //console.log("Incident reported: daemonId=%s, incidentId=%s count=%d", daemonId, incident.Id, incidentCount[daemonId]);

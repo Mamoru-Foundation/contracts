@@ -74,7 +74,12 @@
         "components": [
           {
             "internalType": "string",
-            "name": "Id",
+            "name": "IncidentId",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "DaemonId",
             "type": "string"
           },
           {
@@ -86,6 +91,11 @@
             "internalType": "bytes",
             "name": "Data",
             "type": "bytes"
+          },
+          {
+            "internalType": "int32",
+            "name": "Severity",
+            "type": "int32"
           },
           {
             "internalType": "uint64",
@@ -127,6 +137,11 @@
         "internalType": "uint256",
         "name": "sinceTimestamp",
         "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "limit",
+        "type": "uint256"
       }
     ],
     "name": "getIncidentsSinceByDaemon",
@@ -135,7 +150,12 @@
         "components": [
           {
             "internalType": "string",
-            "name": "Id",
+            "name": "IncidentId",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "DaemonId",
             "type": "string"
           },
           {
@@ -147,6 +167,11 @@
             "internalType": "bytes",
             "name": "Data",
             "type": "bytes"
+          },
+          {
+            "internalType": "int32",
+            "name": "Severity",
+            "type": "int32"
           },
           {
             "internalType": "uint64",

@@ -1,17 +1,12 @@
 import { ethers } from "hardhat";
 
 async function main() {
-  const [deployer] = await ethers.getSigners();
-  console.log("Deploying contracts with the account:", deployer.address);
-  console.log("Account balance:", (await deployer.getBalance()).toString());
-
   const RelayContract = await ethers.getContractFactory("EthMamoruRelay");
-  const lock = await RelayContract.deploy();
-
-  await lock.deployed();
+  const relay = await RelayContract.deploy();
+  await relay.deployed();
 
   console.log(
-    `RelayContract deployed to ${lock.address}`
+    `${relay.address}`
   );
 }
 

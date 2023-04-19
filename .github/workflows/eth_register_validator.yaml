@@ -1,0 +1,37 @@
+# Registers a VC validator in Eth Relay contract
+name: Eth Register Validator
+on:
+  workflow_dispatch:
+    inputs:
+      network:
+        description: "Hardhat network name"
+        required: true
+        default: "bsc_mainnet"
+      validator-address:
+        description: "Validator address in Eth network"
+        required: true
+      private-key:
+        description: "Private key"
+        required: true
+jobs:
+  register_validator:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download publish output
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: eth_publish.yaml
+          workflow_conclusion: success
+          check_artifacts: true
+          name: publish_eth_output
+          path: ./eth_mamoru_relay
+
+      - name: Register validator
+        working-directory: eth_mamoru_relay
+        env:
+          PRIVATE_KEY: ${{ github.event.inputs.private-key }}
+        run: |
+          export CONTRACT_ADDRESS=$(cat eth_output.txt | head -n 1)
+          npx hardhat register_validator --account "${{ github.event.inputs.validator-address }}" --contract ${CONTRACT_ADDRESS} --network "${{ github.event.inputs.network }}"

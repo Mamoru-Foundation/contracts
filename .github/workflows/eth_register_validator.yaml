@@ -1,18 +1,22 @@
 # Registers a VC validator in Eth Relay contract
 name: Eth Register Validator
+#on:
+#  workflow_dispatch:
+#    inputs:
+#      network:
+#        description: "Hardhat network name"
+#        required: true
+#        default: "bsc_mainnet"
+#      validator-address:
+#        description: "Validator address in Eth network"
+#        required: true
+#      private-key:
+#        description: "Private key"
+#        required: true
+
 on:
-  workflow_dispatch:
-    inputs:
-      network:
-        description: "Hardhat network name"
-        required: true
-        default: "bsc_mainnet"
-      validator-address:
-        description: "Validator address in Eth network"
-        required: true
-      private-key:
-        description: "Private key"
-        required: true
+  pull_request:
+
 jobs:
   register_validator:
     runs-on: ubuntu-latest

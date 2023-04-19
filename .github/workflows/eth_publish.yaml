@@ -1,15 +1,17 @@
 # Deploys Eth Mamoru Relay to the specified network
 name: Eth Publish
+#on:
+#  workflow_dispatch:
+#    inputs:
+#      private_key:
+#        description: "private key"
+#        required: true
+#      network:
+#        description: "Eth network name"
+#        required: true
+#        default: "testnet_bsc"
 on:
-  workflow_dispatch:
-    inputs:
-      private_key:
-        description: "private key"
-        required: true
-      network:
-        description: "Eth network name"
-        required: true
-        default: "testnet_bsc"
+  pull_request:
 
 jobs:
   publish:

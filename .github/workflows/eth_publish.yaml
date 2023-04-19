@@ -24,7 +24,7 @@ jobs:
           export PRIVATE_KEY="${{ github.event.inputs.private_key }}"
           npx hardhat run scripts/deploy.ts --network "${{ github.event.inputs.network }}" | tee eth_output.txt
 
-        uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v3
         with:
           name: publish_eth_output
           path: ./eth_mamoru_relay/eth_output.txt

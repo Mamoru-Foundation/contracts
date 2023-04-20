@@ -51,4 +51,5 @@ jobs:
           echo "Validator Address:" ${{ github.event.inputs.validator_address }}
           echo "Network:" ${{ github.event.inputs.network }}
           echo "npx hardhat register_validator --account ${{ github.event.inputs.validator_address }} --contract ${CONTRACT_ADDRESS} --network ${{ github.event.inputs.network }}"
-          npx hardhat register_validator --account ${{ github.event.inputs.validator_address }} --contract "${CONTRACT_ADDRESS}" --network ${{ github.event.inputs.network }}
+          npx hardhat test
+          npx hardhat register_validator --account "${{ github.event.inputs.validator_address }}" --contract "${CONTRACT_ADDRESS}" --network ${{ github.event.inputs.network }}

@@ -45,14 +45,6 @@ jobs:
         working-directory: eth_mamoru_relay
         run: npx hardhat compile
 
-      - name: Show accounts
-        working-directory: eth_mamoru_relay
-        run: npx hardhat accounts
-
-      - name: Show accounts
-        working-directory: eth_mamoru_relay
-        run: npx hardhat balances
-
       - name: Register validator
         working-directory: eth_mamoru_relay
         env:

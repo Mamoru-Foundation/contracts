@@ -3,9 +3,6 @@ name: Eth Register Validator
 on:
   workflow_dispatch:
     inputs:
-      private_key:
-        description: "private key"
-        required: true
       network:
         description: "Hardhat network name"
         required: true
@@ -35,13 +32,13 @@ jobs:
           check_artifacts: true
           name: publish_eth_output
           path: ./eth_mamoru_relay
-
       - name: Register validator
         working-directory: eth_mamoru_relay
         env:
-          PRIVATE_KEY: ${{ github.event.inputs.private_key }}
-        if: ${{ github.event.inputs.private_key != '' && github.event.inputs.network != '' }}
+          PRIVATE_KEY: ${{ secrets.ETH_MAMORU_PRIVATE_KEY }}
+        if: ${{ github.event.inputs.network != '' }}
         run: |
-          export CONTRACT_ADDRESS=$(cat eth_output.txt | head -n 1)
+          set -e -o pipefail
+          export CONTRACT_ADDRESS=$(cat eth_${{ github.event.inputs.network }}_output.txt | head -n 1)
           echo $CONTRACT_ADDRESS
-          npx hardhat register_validator --account "${{ github.event.inputs.validator_address }}" --contract ${CONTRACT_ADDRESS} --network "${{ github.event.inputs.network }}"
+          npx hardhat register_validator --account ${{ github.event.inputs.validator_address }} --contract ${CONTRACT_ADDRESS} --network ${{ github.event.inputs.network }}

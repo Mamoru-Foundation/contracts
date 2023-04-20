@@ -39,6 +39,14 @@ jobs:
           set -e -o pipefail
           npx hardhat run scripts/deploy.ts --network ${{ github.event.inputs.network }} | tee eth_${{ github.event.inputs.network }}_output.txt
 
+      - name: Discover contract address
+        working-directory: eth_mamoru_relay
+        run: |
+          set -e -o pipefail
+          cat eth_${{ github.event.inputs.network }}_output.txt
+          export CONTRACT_ADDRESS=$(cat eth_${{ github.event.inputs.network }}_output.txt | head -n 1)
+          echo $CONTRACT_ADDRESS
+
       - uses: actions/upload-artifact@v3
         with:
           name: publish_eth_output

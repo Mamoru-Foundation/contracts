@@ -1,30 +1,35 @@
 # Deploys Eth Mamoru Relay to the specified network
 name: Eth Publish
-#on:
-#  workflow_dispatch:
-#    inputs:
-#      private_key:
-#        description: "private key"
-#        required: true
-#      network:
-#        description: "Eth network name"
-#        required: true
-#        default: "testnet_bsc"
 on:
-  pull_request:
+  workflow_dispatch:
+    inputs:
+      private_key:
+        description: "private key"
+        required: true
+      network:
+        description: "Eth network name"
+        required: true
+        default: "testnet_bsc"
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Setup Node.js
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+      - name: Install Dependencies
+        working-directory: eth_mamoru_relay
+        run: npm install
 
       - name: Deploy
         working-directory: eth_mamoru_relay
-        if: ${{ secrets.ETH_MAMORU_PRIVATE_KEY != '' && github.event.inputs.network != '' }}
+        if: ${{ github.event.inputs.private_key != '' && github.event.inputs.network != '' }}
         run: |
           set -e -o pipefail
-          export PRIVATE_KEY="${{ github.ETH_MAMORU_PRIVATE_KEY }}"
+          export PRIVATE_KEY="${{ github.event.inputs.private_key }}"
           npx hardhat run scripts/deploy.ts --network ${{ github.event.inputs.network }} | tee eth_output.txt
 
       - uses: actions/upload-artifact@v3
@@ -32,3 +37,5 @@ jobs:
           name: publish_eth_output
           path: ./eth_mamoru_relay/eth_output.txt
           if-no-files-found: error
+
+

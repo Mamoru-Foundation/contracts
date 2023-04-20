@@ -45,7 +45,6 @@ jobs:
           PRIVATE_KEY: ${{ secrets.ETH_MAMORU_PRIVATE_KEY }}
         if: ${{ github.event.inputs.network != '' }}
         run: |
-          set -e -o pipefail
           export CONTRACT_ADDRESS=$(cat eth_${{ github.event.inputs.network }}_output.txt | head -n 1)
           echo $CONTRACT_ADDRESS
           npx hardhat register_validator --account ${{ github.event.inputs.validator_address }} --contract ${CONTRACT_ADDRESS} --network ${{ github.event.inputs.network }}

@@ -1,0 +1,48 @@
+# Deploys Eth Mamoru Relay to the specified network
+name: Eth Publish
+on:
+  workflow_dispatch:
+    inputs:
+      network:
+        type: choice
+        description: "Eth network name"
+        required: true
+        default: sepolia
+        options:
+          - sepolia
+          - bsc_testnet
+          - bsc_mainnet
+          - eth_testnet
+          - eth_mainnet
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        name: Setup Node.js
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install Dependencies
+        working-directory: eth_mamoru_relay
+        run: npm install
+
+      - name: Deploy
+        working-directory: eth_mamoru_relay
+        if: ${{ github.event.inputs.network != '' }}
+        env:
+          PRIVATE_KEY: ${{ secrets.ETH_MAMORU_PRIVATE_KEY }}
+        run: |
+          set -e -o pipefail
+          npx hardhat run scripts/deploy.ts --network ${{ github.event.inputs.network }} | tee eth_${{ github.event.inputs.network }}_output.txt
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: publish_eth_output
+          path: ./eth_mamoru_relay/eth_${{ github.event.inputs.network }}_output.txt
+          if-no-files-found: error
+
+

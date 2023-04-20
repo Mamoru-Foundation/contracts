@@ -4,9 +4,16 @@ on:
   workflow_dispatch:
     inputs:
       network:
+        type: choice
         description: "Eth network name"
         required: true
-        default: "testnet_bsc"
+        default: sepolia
+        options:
+          - sepolia
+          - bsc_testnet
+          - bsc_mainnet
+          - eth_testnet
+          - eth_mainnet
 
 jobs:
   publish:

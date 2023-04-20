@@ -39,6 +39,7 @@ jobs:
           check_artifacts: true
           name: publish_eth_output
           path: ./eth_mamoru_relay
+
       - name: Register validator
         working-directory: eth_mamoru_relay
         env:
@@ -47,4 +48,5 @@ jobs:
         run: |
           export CONTRACT_ADDRESS=$(cat eth_${{ github.event.inputs.network }}_output.txt | head -n 1)
           echo $CONTRACT_ADDRESS
+          cat eth_${{ github.event.inputs.network }}_output.txt
           npx hardhat register_validator --account ${{ github.event.inputs.validator_address }} --contract ${CONTRACT_ADDRESS} --network ${{ github.event.inputs.network }}

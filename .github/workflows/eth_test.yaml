@@ -1,0 +1,40 @@
+name: ETH Hardhat Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  # cancel redundant builds on PRs (only on PR, not on branches)
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install Dependencies
+        working-directory: eth_mamoru_relay
+        run: npm install
+
+      - name: Compile Contracts and Export ABI
+        working-directory: eth_mamoru_relay
+        run: npx hardhat export-abi
+
+
+      - name: Run Tests
+        working-directory: eth_mamoru_relay
+        run:  npx hardhat test

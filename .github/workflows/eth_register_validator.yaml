@@ -1,0 +1,51 @@
+# Registers a VC validator in Eth Relay contract
+name: Eth Register Validator
+on:
+  workflow_dispatch:
+    inputs:
+      network:
+        type: choice
+        description: "Eth network name"
+        required: true
+        default: sepolia
+        options:
+          - sepolia
+          - bsc_testnet
+          - bsc_mainnet
+          - eth_testnet
+          - eth_mainnet
+      validator_address:
+        description: "Validator address in Eth network"
+        required: true
+
+jobs:
+  register_validator:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+      - name: Install Dependencies
+        working-directory: eth_mamoru_relay
+        run: npm install
+
+      - name: Download publish output
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: eth_publish.yaml
+          workflow_conclusion: success
+          check_artifacts: true
+          name: publish_eth_output
+          path: ./eth_mamoru_relay
+      - name: Register validator
+        working-directory: eth_mamoru_relay
+        env:
+          PRIVATE_KEY: ${{ secrets.ETH_MAMORU_PRIVATE_KEY }}
+        if: ${{ github.event.inputs.network != '' }}
+        run: |
+          set -e -o pipefail
+          export CONTRACT_ADDRESS=$(cat eth_${{ github.event.inputs.network }}_output.txt | head -n 1)
+          echo $CONTRACT_ADDRESS
+          npx hardhat register_validator --account ${{ github.event.inputs.validator_address }} --contract ${CONTRACT_ADDRESS} --network ${{ github.event.inputs.network }}

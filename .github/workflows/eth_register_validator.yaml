@@ -27,6 +27,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "18"
+
       - name: Install Dependencies
         working-directory: eth_mamoru_relay
         run: npm install
@@ -40,6 +41,18 @@ jobs:
           name: publish_eth_output
           path: ./eth_mamoru_relay
 
+      - name: Compile Contracts
+        working-directory: eth_mamoru_relay
+        run: npx hardhat compile
+
+      - name: Show accounts
+        working-directory: eth_mamoru_relay
+        run: npx hardhat accounts
+
+      - name: Show accounts
+        working-directory: eth_mamoru_relay
+        run: npx hardhat balances
+
       - name: Register validator
         working-directory: eth_mamoru_relay
         env:
@@ -47,9 +60,8 @@ jobs:
         if: ${{ github.event.inputs.network != '' }}
         run: |
           export CONTRACT_ADDRESS=$(cat eth_${{ github.event.inputs.network }}_output.txt | tail -n 1 | tr -d '\n')
-          echo "Contract Address:"  $CONTRACT_ADDRESS
+          echo "Contract Address:" $CONTRACT_ADDRESS
           echo "Validator Address:" ${{ github.event.inputs.validator_address }}
           echo "Network:" ${{ github.event.inputs.network }}
           echo "npx hardhat register_validator --account ${{ github.event.inputs.validator_address }} --contract ${CONTRACT_ADDRESS} --network ${{ github.event.inputs.network }}"
-          npx hardhat test
           npx hardhat register_validator --account "${{ github.event.inputs.validator_address }}" --contract "${CONTRACT_ADDRESS}" --network ${{ github.event.inputs.network }}

@@ -4,11 +4,13 @@ import "@nomiclabs/hardhat-solhint";
 import "hardhat-abi-exporter";
 
 // Show the balance of an account
-task("balance", "Prints an account's balance")
-    .addParam("account", "The account's address", null, types.string)
-    .setAction(async (taskArgs: { account: string; }) => {
-      const balance = await ethers.provider.getBalance(taskArgs.account);
-      console.log(ethers.utils.formatEther(balance), "ETH");
+task("balances", "Prints an accounts balances", async () => {
+      const accounts = await ethers.getSigners();
+
+      for (const account of accounts) {
+        const balance = await ethers.provider.getBalance(account.address);
+        console.log(account.address, ethers.utils.formatEther(balance), "ETH");
+      }
 });
 
 // Show the list of accounts

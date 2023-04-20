@@ -47,6 +47,6 @@ jobs:
         if: ${{ github.event.inputs.network != '' }}
         run: |
           export CONTRACT_ADDRESS=$(cat eth_${{ github.event.inputs.network }}_output.txt | head -n 1 | tr -d '\n')
-          echo $CONTRACT_ADDRESS
-          echo $(cat eth_${{ github.event.inputs.network }}_output.txt | head -n 1 | tr -d '\n')
-          npx hardhat register_validator --account ${{ github.event.inputs.validator_address }} --contract ${CONTRACT_ADDRESS} --network ${{ github.event.inputs.network }}
+          cat eth_${{ github.event.inputs.network }}_output.txt | head -n 1 | tr -d '\n'
+          echo "|${CONTRACT_ADDRESS/$'\n'}|"
+          npx hardhat register_validator --account ${{ github.event.inputs.validator_address }} --contract "${CONTRACT_ADDRESS}" --network ${{ github.event.inputs.network }}

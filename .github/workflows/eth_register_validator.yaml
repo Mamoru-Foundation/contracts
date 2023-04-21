@@ -47,7 +47,7 @@ jobs:
 
       - name: Show accounts
         working-directory: eth_mamoru_relay
-        run: npx hardhat balances ${{ github.event.inputs.network }}
+        run: npx hardhat balances --network ${{ github.event.inputs.network }}
 
       - name: Register validator
         working-directory: eth_mamoru_relay

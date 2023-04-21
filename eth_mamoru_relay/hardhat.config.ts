@@ -23,6 +23,19 @@ task("accounts", "Prints the list of accounts", async () => {
 });
 
 // Show the list of accounts
+task("incidents", "Prints the list of incidents")
+    .addParam("contract", "The contract's address", null, types.string)
+    .addParam("daemonId", "The account's address", null, types.string)
+    .setAction(async (taskArgs: { daemonId: string; contract: string;}) => {
+        const EthRelay = await ethers.getContractFactory("EthMamoruRelay")
+        const contract = await EthRelay.attach(taskArgs.contract)
+        const timestamp = Math.floor(Date.now() / 1000);
+        const incidents = await contract.getIncidentsSinceByDaemon(taskArgs.daemonId, timestamp - 60*60*24*30 )
+        for (const incident of incidents) {
+            console.log(incident)
+        }
+});
+
 task("register_validator", "Register validator account")
     .addParam("account", "The account's address", null, types.string)
     .addParam("contract", "The contract's address", null, types.string)
@@ -32,7 +45,6 @@ task("register_validator", "Register validator account")
         await contract.addValidator(taskArgs.account)
         console.log("Validator registered")
 });
-
 
 // Private key for the account to use for deployment (must be funded)
 //0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 it's test private key

@@ -1,0 +1,40 @@
+# Deploys Aptos Mamoru Relay to the specified network
+name: Aptos Publish
+on:
+  workflow_dispatch:
+    inputs:
+      rpc-url:
+        description: "Aptos RPC URL"
+        required: true
+        default: "https://fullnode.testnet.aptoslabs.com"
+      cli-version:
+        description: "Aptos CLI version"
+        required: true
+        default: "1.0.11"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/setup_aptos_cli
+        with:
+          version: ${{ github.event.inputs.cli-version }}
+          rpc-url: ${{ github.event.inputs.rpc-url }}
+          private-key: ${{ secrets.APTOS_MAMORU_PRIVATE_KEY }}
+          public-key: ${{ secrets.APTOS_MAMORU_PUBLIC_KEY }}
+          address: ${{ secrets.APTOS_MAMORU_DEPLOY_ADDRESS }}
+
+      - name: Deploy
+        working-directory: aptos_mamoru_relay
+        run: |
+          set -e
+
+          aptos move publish --profile default --assume-yes
+
+          aptos move run  --profile default --assume-yes \
+            --function-id 0x${{ secrets.APTOS_MAMORU_DEPLOY_ADDRESS }}::validators::initialize
+          
+          aptos move run --profile default --assume-yes \
+            --function-id 0x${{ secrets.APTOS_MAMORU_DEPLOY_ADDRESS }}::incidents::initialize

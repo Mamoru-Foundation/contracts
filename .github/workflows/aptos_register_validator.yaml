@@ -1,0 +1,37 @@
+# Registers a VC validator in Aptos Relay contract
+name: Aptos Register Validator
+on:
+  workflow_dispatch:
+    inputs:
+      rpc-url:
+        description: "Aptos RPC URL"
+        required: true
+        default: "https://fullnode.testnet.aptoslabs.com"
+      cli-version:
+        description: "Aptos CLI version"
+        required: true
+        default: "1.0.11"
+      validator-address:
+        description: "Validator address in Aptos network"
+        required: true
+
+jobs:
+  register_validator:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: ./.github/actions/setup_aptos_cli
+        with:
+          version: ${{ github.event.inputs.cli-version }}
+          rpc-url: ${{ github.event.inputs.rpc-url }}
+          private-key: ${{ secrets.APTOS_MAMORU_PRIVATE_KEY }}
+          public-key: ${{ secrets.APTOS_MAMORU_PUBLIC_KEY }}
+          address: ${{ secrets.APTOS_MAMORU_DEPLOY_ADDRESS }}
+
+      - name: Register validator
+        working-directory: aptos_mamoru_relay
+        run: |
+          aptos move run --profile default --assume-yes \
+            --function-id ${{ secrets.APTOS_MAMORU_DEPLOY_ADDRESS }}::validators::register_validator \
+            --args 'address:${{ github.event.inputs.validator-address }}'

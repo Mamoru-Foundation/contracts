@@ -1,0 +1,7 @@
+---
+profiles:
+  default:
+    private_key: "${APTOS_PRIVATE_KEY}"
+    public_key: "${APTOS_PUBLIC_KEY}"
+    account: "${APTOS_ACCOUNT_ADDRESS}"
+    rest_url: "${APTOS_REST_URL}"

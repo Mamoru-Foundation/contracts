@@ -1,0 +1,56 @@
+name: Setup Aptos CLI
+description: A composite action that sets up the Aptos CLI
+inputs:
+  version:
+    description: The version of the Aptos CLI to download
+    required: true
+  private-key:
+    description: The private key to setup for Aptos Client
+    required: false
+    default: ""
+  public-key:
+    description: The public key to setup for Aptos Client
+    required: false
+    default: ""
+  address:
+    description: The address to setup for Aptos Client, should correspond to the private key
+    required: false
+    default: ""
+  rpc-url:
+    description: The RPC URL to setup for Aptos Client
+    required: false
+    default: "https://fullnode.testnet.aptoslabs.com"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Download Aptos CLI
+      uses: robinraju/release-downloader@v1.7
+      with:
+        repository: "aptos-labs/aptos-core"
+        tag: aptos-cli-v${{ inputs.version }}
+        fileName: aptos-cli-${{ inputs.version }}-Ubuntu-x86_64.zip
+    - name: Setup Aptos CLI
+      shell: bash
+      run: |
+        unzip aptos-cli-${{ inputs.version }}-Ubuntu-x86_64.zip
+        mv ./aptos /usr/local/bin
+        chmod +x /usr/local/bin/aptos
+
+    - name: Setup Aptos Client
+      shell: bash
+      if: ${{ inputs.private-key != '' && inputs.public-key != '' && inputs.address != '' }}
+      run: |
+        set -e -o pipefail
+
+        APTOS_CONFIG_DIR="./.aptos/"
+        mkdir -p "${APTOS_CONFIG_DIR}"
+        
+        export APTOS_CONFIG_PATH="${APTOS_CONFIG_DIR}/config.yaml"
+
+        export APTOS_REST_URL="${{ inputs.rpc-url }}"
+        export APTOS_PRIVATE_KEY="${{ inputs.private-key }}"
+        export APTOS_PUBLIC_KEY="${{ inputs.public-key }}"
+        export APTOS_ACCOUNT_ADDRESS="${{ inputs.address }}"
+
+        envsubst < .github/aptos_cli/config.yaml > ${APTOS_CONFIG_PATH}

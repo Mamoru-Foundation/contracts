@@ -1,0 +1,14 @@
+[package]
+name = 'aptos_mamoru_relay'
+version = '1.0.0'
+
+[dependencies.AptosFramework]
+git = 'https://github.com/aptos-labs/aptos-core.git'
+rev = 'testnet'
+subdir = 'aptos-move/framework/aptos-framework'
+
+[addresses]
+aptos_mamoru_relay = "0x53176debc465711a6f0d8cd81806e0a045f850431ad0c52950c31e3df0b80e7f"
+std = "0x1"
+aptos_std = "0x1"
+aptos_framework = "0x1"

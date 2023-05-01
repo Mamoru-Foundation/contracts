@@ -43,9 +43,17 @@ jobs:
         working-directory: eth_mamoru_relay
         run: |
           set -e -o pipefail
-          cat eth_${{ github.event.inputs.network }}_output.txt
-          export CONTRACT_ADDRESS=$(cat eth_${{ github.event.inputs.network }}_output.txt | tail -n 1 | tr -d '\n')
+          export CONTRACT_ADDRESS="$(cat eth_${{ github.event.inputs.network }}_output.txt | tail -n 1 | tr -d '\n')"
           echo ${CONTRACT_ADDRESS}
+
+      - name: Verify
+        working-directory: eth_mamoru_relay
+        if: ${{ github.event.inputs.network != '' }}
+        env:
+          PRIVATE_KEY: ${{ secrets.ETH_MAMORU_PRIVATE_KEY }}
+          ETHSCAN_API_KEY: ${{ secrets.ETHSCAN_API_KEY }}
+        run: |
+          npx hardhat verify ${CONTRACT_ADDRESS} --network ${{ github.event.inputs.network }} 
 
       - uses: actions/upload-artifact@v3
         with:

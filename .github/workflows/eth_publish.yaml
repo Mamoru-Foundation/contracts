@@ -40,13 +40,13 @@ jobs:
         env:
           PRIVATE_KEY: ${{ secrets.ETH_MAMORU_PRIVATE_KEY }}
         run: |
-          set -e -o pipefail
-          npx hardhat run scripts/deploy.ts --network ${{ github.event.inputs.network }} | tee eth_${{ github.event.inputs.network }}_output.txt
+          set -o xtrace
+          npx hardhat run scripts/deploy.ts --network ${{ github.event.inputs.network }} | tee "eth_${{ github.event.inputs.network }}_output.txt"
 
       - name: Discover contract address
         working-directory: eth_mamoru_relay
         run: |
-          set -e -o pipefail
+          set -o xtrace
           export CONTRACT_ADDRESS="$(cat eth_${{ github.event.inputs.network }}_output.txt | tail -n 1 | tr -d '\n')"
           echo ${CONTRACT_ADDRESS}
 

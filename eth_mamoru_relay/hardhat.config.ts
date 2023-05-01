@@ -1,6 +1,7 @@
 import {HardhatUserConfig, task, types} from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import "@nomiclabs/hardhat-solhint";
+import "@nomiclabs/hardhat-etherscan";
 import "hardhat-abi-exporter";
 
 // Show the balance of an account
@@ -49,7 +50,7 @@ task("register_validator", "Register validator account")
 // Private key for the account to use for deployment (must be funded)
 //0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 it's test private key
 const PRIVATE_KEY: string = (process.env.PRIVATE_KEY as string) ?? "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
-
+const ETHSCAN_API_KEY: string = (process.env.ETHSCAN_API_KEY as string) ?? "";
 const config: HardhatUserConfig = {
   solidity: {
     version:"0.8.18",
@@ -92,7 +93,10 @@ const config: HardhatUserConfig = {
       gasPrice: 20000000000,
       accounts: [PRIVATE_KEY]
     }
-  }
+  },
+    etherscan: {
+        apiKey: ETHSCAN_API_KEY
+    }
 };
 
 export default config;

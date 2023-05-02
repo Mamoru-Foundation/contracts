@@ -41,7 +41,7 @@ jobs:
           PRIVATE_KEY: ${{ secrets.ETH_MAMORU_PRIVATE_KEY }}
         run: |
           set -o xtrace
-          npx hardhat run scripts/deploy.ts --network ${{ github.event.inputs.network }} | tee "eth_${{ github.event.inputs.network }}_output.txt"
+          npx hardhat run scripts/deploy.ts --network ${{ github.event.inputs.network }} >> tee "eth_${{ github.event.inputs.network }}_output.txt"
 
       - name: Discover contract address
         working-directory: eth_mamoru_relay

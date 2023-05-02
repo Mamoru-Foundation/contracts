@@ -43,7 +43,9 @@ jobs:
 
       - name: Compile Contracts
         working-directory: eth_mamoru_relay
-        run: npx hardhat compile
+        run: | 
+          npx hardhat compile
+          sleep 5
 
       - name: Show accounts
         working-directory: eth_mamoru_relay

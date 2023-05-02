@@ -43,14 +43,7 @@ jobs:
           set -o xtrace
           npx hardhat run scripts/deploy.ts --network ${{ github.event.inputs.network }} &>> "eth_${{ github.event.inputs.network }}_output.txt"
 
-      - name: Discover contract address
-        working-directory: eth_mamoru_relay
-        run: |
-          set -o xtrace
-          export CONTRACT_ADDRESS="$(cat eth_${{ github.event.inputs.network }}_output.txt | tail -n 1 | tr -d '\n')"
-          echo ${CONTRACT_ADDRESS}
-
-      - name: Verify
+      - name: Verify && Discover contract
         working-directory: eth_mamoru_relay
         if: ${{ github.event.inputs.network != '' }}
         env:
@@ -58,6 +51,7 @@ jobs:
           ETHSCAN_API_KEY: ${{ secrets.ETHSCAN_API_KEY }}
         run: |
           set -o xtrace
+          export CONTRACT_ADDRESS="$(cat eth_${{ github.event.inputs.network }}_output.txt | tail -n 1 | tr -d '\n')"
           echo ${CONTRACT_ADDRESS}
           npx hardhat verify ${CONTRACT_ADDRESS} --network ${{ github.event.inputs.network }} 
 

@@ -32,7 +32,9 @@ jobs:
 
       - name: Compile
         working-directory: eth_mamoru_relay
-        run: npx hardhat compile
+        run: |
+          npx hardhat compile
+          sleep 5
 
       - name: Deploy
         working-directory: eth_mamoru_relay
@@ -40,8 +42,8 @@ jobs:
         env:
           PRIVATE_KEY: ${{ secrets.ETH_MAMORU_PRIVATE_KEY }}
         run: |
-          set -o xtrace
-          npx hardhat run scripts/deploy.ts --network ${{ github.event.inputs.network }} &>> "eth_${{ github.event.inputs.network }}_output.txt"
+          set -e -o pipefail
+          npx hardhat run scripts/deploy.ts --network ${{ github.event.inputs.network }} >> "eth_${{ github.event.inputs.network }}_output.txt"
 
       - name: Verify && Discover contract
         working-directory: eth_mamoru_relay
@@ -50,7 +52,7 @@ jobs:
           PRIVATE_KEY: ${{ secrets.ETH_MAMORU_PRIVATE_KEY }}
           ETHSCAN_API_KEY: ${{ secrets.ETHSCAN_API_KEY }}
         run: |
-          set -o xtrace
+          set -e -o pipefail
           export CONTRACT_ADDRESS="$(cat eth_${{ github.event.inputs.network }}_output.txt | tail -n 1 | tr -d '\n')"
           echo ${CONTRACT_ADDRESS}
           npx hardhat verify ${CONTRACT_ADDRESS} --network ${{ github.event.inputs.network }} 

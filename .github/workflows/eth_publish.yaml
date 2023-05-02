@@ -38,7 +38,6 @@ jobs:
 
       - name: Deploy
         working-directory: eth_mamoru_relay
-        if: ${{ github.event.inputs.network != '' }}
         env:
           PRIVATE_KEY: ${{ secrets.ETH_MAMORU_PRIVATE_KEY }}
         run: |
@@ -47,7 +46,6 @@ jobs:
 
       - name: Verify && Discover contract
         working-directory: eth_mamoru_relay
-        if: ${{ github.event.inputs.network != '' }}
         env:
           PRIVATE_KEY: ${{ secrets.ETH_MAMORU_PRIVATE_KEY }}
           ETHSCAN_API_KEY: ${{ secrets.ETHSCAN_API_KEY }}

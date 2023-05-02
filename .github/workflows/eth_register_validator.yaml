@@ -51,7 +51,6 @@ jobs:
         working-directory: eth_mamoru_relay
         env:
           PRIVATE_KEY: ${{ secrets.ETH_MAMORU_PRIVATE_KEY }}
-        if: ${{ github.event.inputs.network != '' }}
         run: |
           export CONTRACT_ADDRESS=$(cat eth_${{ github.event.inputs.network }}_output.txt | tail -n 1 | tr -d '\n')
           echo "Contract Address:" $CONTRACT_ADDRESS

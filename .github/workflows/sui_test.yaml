@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/setup_sui_cli
         with:
-          version: devnet-0.29.0
+          version: testnet-v1.2.0
       - name: Test
         working-directory: sui_mamoru_relay
         run: sui move test

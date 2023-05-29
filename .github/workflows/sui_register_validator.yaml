@@ -52,6 +52,6 @@ jobs:
           export VALIDATOR_REGISTRY_OWNER_CAP_ID=$(cat sui-publish-output.json | jq -r '.validatorRegistryOwnerCapId')
 
           sui client call --package ${PACKAGE_ID} --module validators --function register_validator \
-          --gas-budget 1000000 \
+          --gas-budget 10000000 \
           --json \
           --args ${VALIDATOR_REGISTRY_OWNER_CAP_ID} ${VALIDATOR_REGISTRY_ID} ${VALIDATOR_ADDRESS}

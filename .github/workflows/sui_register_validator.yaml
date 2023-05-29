@@ -6,11 +6,11 @@ on:
       sui-rpc-url:
         description: "Sui RPC URL"
         required: true
-        default: "https://fullnode.devnet.sui.io:443"
+        default: "https://fullnode.testnet.sui.io:443"
       cli-version:
         description: "Sui CLI version"
         required: true
-        default: "devnet-0.29.0"
+        default: "testnet-v1.2.0"
       validator-address:
         description: "Validator address in Sui network"
         required: true
@@ -52,6 +52,6 @@ jobs:
           export VALIDATOR_REGISTRY_OWNER_CAP_ID=$(cat sui-publish-output.json | jq -r '.validatorRegistryOwnerCapId')
 
           sui client call --package ${PACKAGE_ID} --module validators --function register_validator \
-          --gas-budget 10000 \
+          --gas-budget 1000000 \
           --json \
           --args ${VALIDATOR_REGISTRY_OWNER_CAP_ID} ${VALIDATOR_REGISTRY_ID} ${VALIDATOR_ADDRESS}

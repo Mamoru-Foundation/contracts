@@ -32,7 +32,7 @@ jobs:
         working-directory: sui_mamoru_relay
         run: |
           set -o pipefail
-          sui client publish --gas-budget 10000000 --json | tee output.json
+          sui client publish --gas-budget 100000000 --json | tee output.json
 
       # this is required for calling `register_validator` in another workflow
       - name: Parse output

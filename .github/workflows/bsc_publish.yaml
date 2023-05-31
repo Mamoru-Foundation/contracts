@@ -1,5 +1,5 @@
 # Deploys Bsc Mamoru Relay to the specified network
-name: Bsc Publish
+name: BSC Publish
 on:
   workflow_dispatch:
     inputs:

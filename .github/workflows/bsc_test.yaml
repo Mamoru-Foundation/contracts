@@ -1,4 +1,4 @@
-name: ETH Hardhat Test
+name: BSC Hardhat Test
 
 on:
   push:

@@ -1,5 +1,5 @@
 # Registers a VC validator in Eth Relay contract
-name: Eth Register Validator
+name: BSC Register Validator
 on:
   workflow_dispatch:
     inputs:

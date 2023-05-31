@@ -1,0 +1,61 @@
+# Deploys Bsc Mamoru Relay to the specified network
+name: BSC Publish
+on:
+  workflow_dispatch:
+    inputs:
+      network:
+        type: choice
+        description: "BSC network name"
+        required: true
+        default: bsc_testnet
+        options:
+          - bsc_testnet
+          - bsc_mainnet
+
+jobs:
+  bsc_publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install Dependencies
+        working-directory: bsc_mamoru_relay
+        run: npm install
+
+      - name: Compile
+        working-directory: bsc_mamoru_relay
+        run: |
+          npx hardhat compile
+          sleep 5
+
+      - name: Deploy
+        working-directory: bsc_mamoru_relay
+        env:
+          PRIVATE_KEY: ${{ secrets.BSC_MAMORU_PRIVATE_KEY }}
+        run: |
+          set -e -o pipefail
+          npx hardhat run scripts/deploy.ts --network ${{ github.event.inputs.network }} >> "${{ github.event.inputs.network }}_output.txt"
+
+      - name: Verify && Discover contract
+        working-directory: bsc_mamoru_relay
+        env:
+          PRIVATE_KEY: ${{ secrets.BSC_MAMORU_PRIVATE_KEY }}
+          ETHSCAN_API_KEY: ${{ secrets.BSCSCAN_API_KEY }}
+        run: |
+          set -e -o pipefail
+          export CONTRACT_ADDRESS="$(cat ${{ github.event.inputs.network }}_output.txt | tail -n 1 | tr -d '\n')"
+          echo ${CONTRACT_ADDRESS}
+          npx hardhat verify ${CONTRACT_ADDRESS} --network ${{ github.event.inputs.network }} 
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: publish_bsc_output
+          path: ./bsc_mamoru_relay/${{ github.event.inputs.network }}_output.txt
+          if-no-files-found: error
+
+

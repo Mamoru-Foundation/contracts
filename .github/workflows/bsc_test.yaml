@@ -1,4 +1,4 @@
-name: ETH Hardhat Test
+name: BSC Hardhat Test
 
 on:
   push:
@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  eth_test:
+  bsc_test:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,15 +27,15 @@ jobs:
           node-version: "18"
 
       - name: Install Dependencies
-        working-directory: eth_mamoru_relay
+        working-directory: bsc_mamoru_relay
         run: npm install
 
       - name: Compile Contracts and Export ABI
-        working-directory: eth_mamoru_relay
+        working-directory: bsc_mamoru_relay
         run: npx hardhat export-abi
 
 
       - name: Run Tests
-        working-directory: eth_mamoru_relay
+        working-directory: bsc_mamoru_relay
         run:  REPORT_GAS=true npx hardhat test
 

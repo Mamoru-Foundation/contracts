@@ -10,7 +10,7 @@ task("balances", "Prints an accounts balances", async () => {
 
       for (const account of accounts) {
         const balance = await ethers.provider.getBalance(account.address);
-        console.log(account.address, ethers.utils.formatEther(balance), "ETH");
+        console.log(account.address, ethers.utils.formatEther(balance), "BNB");
       }
 });
 
@@ -26,12 +26,12 @@ task("accounts", "Prints the list of accounts", async () => {
 // Show the list of accounts
 task("incidents", "Prints the list of incidents")
     .addParam("contract", "The contract's address", null, types.string)
-    .addParam("daemonid", "The account's address", null, types.string)
-    .setAction(async (taskArgs: { daemonid: string; contract: string;}) => {
-        const EthRelay = await ethers.getContractFactory("EthMamoruRelay")
+    .addParam("daemonId", "The account's address", null, types.string)
+    .setAction(async (taskArgs: { daemonId: string; contract: string;}) => {
+        const EthRelay = await ethers.getContractFactory("BscMamoruRelay")
         const contract = await EthRelay.attach(taskArgs.contract)
         const timestamp = Math.floor(Date.now() / 1000);
-        const incidents = await contract.getIncidentsSinceByDaemon(taskArgs.daemonid, timestamp - 60*60*24*30 )
+        const incidents = await contract.getIncidentsSinceByDaemon(taskArgs.daemonId, timestamp - 60*60*24*30 )
         for (const incident of incidents) {
             console.log(incident)
         }
@@ -41,7 +41,7 @@ task("register_validator", "Register validator account")
     .addParam("account", "The account's address", null, types.string)
     .addParam("contract", "The contract's address", null, types.string)
     .setAction(async (taskArgs: { account: string; contract: string; }) => {
-        const EthRelay = await ethers.getContractFactory("EthMamoruRelay")
+        const EthRelay = await ethers.getContractFactory("BscMamoruRelay")
         const contract = await EthRelay.attach(taskArgs.contract)
         await contract.addValidator(taskArgs.account)
         console.log("Validator registered")
@@ -50,7 +50,8 @@ task("register_validator", "Register validator account")
 // Private key for the account to use for deployment (must be funded)
 //0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 it's test private key
 const PRIVATE_KEY: string = (process.env.PRIVATE_KEY as string) ?? "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
-const ETHSCAN_API_KEY: string = (process.env.ETHSCAN_API_KEY as string) ?? "";
+const BSCSCAN_API_KEY: string = (process.env.BSCSCAN_API_KEY as string) ?? "";
+
 const config: HardhatUserConfig = {
   solidity: {
     version:"0.8.18",
@@ -65,26 +66,24 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
     },
-    sepolia: {
-      url: `https://sepolia.infura.io/v3/181b5fd5f80745f1bb5993c87966ece4`,
-      accounts: [PRIVATE_KEY]
-    },
-    eth_testnet: {
-      url: "https://endpoints.omniatech.io/v1/eth/goerli/public",
-      chainId: 5,
+    bsc_testnet: {
+      url: `https://data-seed-prebsc-1-s1.binance.org:8545`,
+      chainId: 97,
       gasPrice: 20000000000,
       accounts: [PRIVATE_KEY]
     },
-    eth_mainnet: {
-      url: "https://ethereum.publicnode.com",
-      chainId: 1,
+    bsc_mainnet: {
+      url: "https://bsc-dataseed.binance.org/",
+      chainId: 56,
       gasPrice: 20000000000,
       accounts: [PRIVATE_KEY]
-    }
+    },
   },
     etherscan: {
-        apiKey: ETHSCAN_API_KEY
-    }
+        // Your API key for Etherscan
+        // Obtain one at https://bscscan.com/
+        apiKey: BSCSCAN_API_KEY
+    },
 };
 
 export default config;

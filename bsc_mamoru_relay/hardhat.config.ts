@@ -82,7 +82,7 @@ const config: HardhatUserConfig = {
     etherscan: {
         apiKey: {
             bscTestnet: BSCSCAN_API_KEY,
-            bscMainnet: BSCSCAN_API_KEY
+            bsc: BSCSCAN_API_KEY,
         }
     }
 };

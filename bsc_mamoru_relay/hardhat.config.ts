@@ -53,37 +53,35 @@ const PRIVATE_KEY: string = (process.env.PRIVATE_KEY as string) ?? "0xac0974bec3
 const BSCSCAN_API_KEY: string = (process.env.BSCSCAN_API_KEY as string) ?? "";
 
 const config: HardhatUserConfig = {
-  solidity: {
-    version:"0.8.18",
-    settings:{
-        optimizer: {
-            enabled: true,
-            runs: 200
+    solidity: {
+        version:"0.8.18",
+        settings:{
+            optimizer: {
+                enabled: true,
+                runs: 200
+            }
         }
-    }
-  },
-  //defaultNetwork: "localhost",
-  networks: {
-    hardhat: {
     },
-    bsc_testnet: {
-      url: `https://data-seed-prebsc-1-s1.binance.org:8545`,
-      chainId: 97,
-      gasPrice: 20000000000,
-      accounts: [PRIVATE_KEY]
+    //defaultNetwork: "localhost",
+    networks: {
+        hardhat: {
+        },
+        bsc_testnet: {
+          url: `https://data-seed-prebsc-1-s1.binance.org:8545`,
+          chainId: 97,
+          gasPrice: 20000000000,
+          accounts: [PRIVATE_KEY]
+        },
+        bsc_mainnet: {
+          url: "https://bsc-dataseed.binance.org/",
+          chainId: 56,
+          gasPrice: 20000000000,
+          accounts: [PRIVATE_KEY]
+        },
     },
-    bsc_mainnet: {
-      url: "https://bsc-dataseed.binance.org/",
-      chainId: 56,
-      gasPrice: 20000000000,
-      accounts: [PRIVATE_KEY]
-    },
-  },
     etherscan: {
-        // Your API key for Etherscan
-        // Obtain one at https://bscscan.com/
         apiKey: BSCSCAN_API_KEY
-    },
+    }
 };
 
 export default config;

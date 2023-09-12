@@ -1,0 +1,9 @@
+[package]
+name = "vulnerable-counter"
+version = "0.0.1"
+
+[dependencies]
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet" }
+
+[addresses]
+vulnerable_counter = "0x4958a3a96e91380a443d116b84c07b48dba90bce664d9f060f94a8f26f537e62"

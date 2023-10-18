@@ -1,4 +1,4 @@
-name: ETH Hardhat Test
+name: EVM Tx Relay Test
 
 on:
   push:
@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  eth_test:
+  evm_tx_relay_test:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,6 +27,7 @@ jobs:
           node-version: "18"
 
       - name: Install Dependencies
+        working-directory: evm_tx_relay
         run: npm install
 
       - name: Run Tests

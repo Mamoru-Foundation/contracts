@@ -1,7 +1,7 @@
 import {HardhatUserConfig, task, types} from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 
-task("add-relay-address", "Register relay address")
+task("add-validator", "Register relay address")
     .addParam("validator", "The validator address", null, types.string)
     .addParam("contract", "The contract's address", null, types.string)
     .setAction(async (taskArgs: { validator: string; contract: string; }, runtime) => {
@@ -12,7 +12,7 @@ task("add-relay-address", "Register relay address")
         console.log("Ok");
     });
 
-task("remove-relay-address", "Register relay address")
+task("remove-validator", "Register relay address")
     .addParam("validator", "The validator address", null, types.string)
     .addParam("contract", "The contract's address", null, types.string)
     .setAction(async (taskArgs: { validator: string; contract: string; }, runtime) => {

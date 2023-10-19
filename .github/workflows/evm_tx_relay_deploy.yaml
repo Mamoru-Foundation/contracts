@@ -1,0 +1,39 @@
+# Deploys EVM TX Relay to the specified network
+name: EVM Tx Relay Deploy
+on:
+  workflow_dispatch:
+    inputs:
+      network:
+        type: choice
+        description: "Network name"
+        required: true
+        options:
+          - bsc_testnet
+          - bsc_mainnet
+          - eth_sepolia
+          - eth_mainnet
+
+jobs:
+  deploy:
+    name: "Deploy"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install Dependencies
+        working-directory: evm_tx_relay
+        run: npm install
+
+      - name: Deploy
+        working-directory: evm_tx_relay
+        env:
+          HARDHAT_PRIVATE_KEY: ${{ secrets.EVM_TX_RELAY_PRIVATE_KEY }}
+        run: |
+          set -xe
+          npx hardhat compile
+          npx hardhat --network ${{ github.event.inputs.network }} deploy

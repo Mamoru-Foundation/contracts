@@ -1,5 +1,5 @@
 # Deploys EVM TX Relay to the specified network
-name: EVM Tx Relay Remove Address
+name: EVM Tx Relay Add Validator
 on:
   workflow_dispatch:
     inputs:
@@ -20,8 +20,8 @@ on:
         required: true
 
 jobs:
-  remove_relayer:
-    name: "Remove relayer"
+  add_relayer:
+    name: "Add validator"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -42,6 +42,6 @@ jobs:
         run: |
           set -xe
           npx hardhat compile
-          npx hardhat --network ${{ github.event.inputs.network }} remove-relay-address \
+          npx hardhat --network ${{ github.event.inputs.network }} add-validator \
             --contract ${{ github.event.inputs.contract }} \
-            --relay-address ${{ github.event.inputs.relay-address }}
+            --validator ${{ github.event.inputs.relay-address }}

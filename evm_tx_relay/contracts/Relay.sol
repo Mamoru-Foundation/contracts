@@ -10,28 +10,28 @@ contract Relay is Ownable {
     using MessageHashUtils for bytes32;
     using ECDSA for bytes32;
 
-    mapping(address => bool) private relayAddresses;
-    uint256 private relayAddressCount = 0;
+    mapping(address => bool) private validators;
+    uint256 private validatorCount = 0;
     mapping(bytes32 => bool) private relayedTxs;
 
     constructor() Ownable(msg.sender) {}
 
-    function addRelayAddress(address _relayAddress) public onlyOwner {
-        if (!relayAddresses[_relayAddress]) {
-            relayAddresses[_relayAddress] = true;
-            relayAddressCount++;
+    function addValidator(address _validator) public onlyOwner {
+        if (!validators[_validator]) {
+            validators[_validator] = true;
+            validatorCount++;
         }
     }
 
-    function removeRelayAddress(address _relayAddress) public onlyOwner {
-        if (relayAddresses[_relayAddress]) {
-            relayAddresses[_relayAddress] = false;
-            relayAddressCount--;
+    function removeValidator(address _validator) public onlyOwner {
+        if (validators[_validator]) {
+            validators[_validator] = false;
+            validatorCount--;
         }
     }
 
     function getBFTThreshold() public view returns (uint256) {
-        return (relayAddressCount * 2 / 3) + 1;  // (2/3)+1 BFT
+        return (validatorCount * 2 / 3) + 1;  // (2/3)+1 BFT
     }
 
     function relayTransaction(
@@ -46,11 +46,22 @@ contract Relay is Ownable {
         require(!relayedTxs[txHash], "Transaction already processed");
 
         bytes32 messageHash = txHash.toEthSignedMessageHash();
+
+        address[] memory seenSigners = new address[](signatures.length);
+        uint256 seenCount = 0;
         uint256 validSignatures = 0;
         for (uint256 i = 0; i < signatures.length; i++) {
             address signer = messageHash.recover(signatures[i]);
 
-            if (relayAddresses[signer]) {
+            // Solidity does not support local memory mappings
+            // So, iterating to check signer uniqness
+            for (uint256 j = 0; j < seenCount; j++) {
+                require(signer != seenSigners[j], "Signatures must be from different validators");
+            }
+            seenSigners[seenCount] = signer;
+            seenCount++;
+
+            if (validators[signer]) {
                 validSignatures++;
             }
         }

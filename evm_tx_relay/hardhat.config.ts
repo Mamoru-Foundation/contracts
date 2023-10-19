@@ -2,23 +2,23 @@ import {HardhatUserConfig, task, types} from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 
 task("add-relay-address", "Register relay address")
-    .addParam("relayAddress", "The relay address", null, types.string)
+    .addParam("validator", "The validator address", null, types.string)
     .addParam("contract", "The contract's address", null, types.string)
-    .setAction(async (taskArgs: { relayAddress: string; contract: string; }, runtime) => {
+    .setAction(async (taskArgs: { validator: string; contract: string; }, runtime) => {
         const EthRelay = await runtime.ethers.getContractFactory("Relay");
         const contract = EthRelay.attach(taskArgs.contract);
-        await contract.addRelayAddress(taskArgs.relayAddress);
+        await contract.addValidator(taskArgs.validator);
 
         console.log("Ok");
     });
 
 task("remove-relay-address", "Register relay address")
-    .addParam("relayAddress", "The relay address", null, types.string)
+    .addParam("validator", "The validator address", null, types.string)
     .addParam("contract", "The contract's address", null, types.string)
-    .setAction(async (taskArgs: { relayAddress: string; contract: string; }, runtime) => {
+    .setAction(async (taskArgs: { validator: string; contract: string; }, runtime) => {
         const EthRelay = await runtime.ethers.getContractFactory("Relay");
         const contract = EthRelay.attach(taskArgs.contract);
-        await contract.removeRelayAddress(taskArgs.relayAddress);
+        await contract.removeValidator(taskArgs.validator);
 
         console.log("Ok");
     });

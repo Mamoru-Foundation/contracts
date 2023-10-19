@@ -9,8 +9,8 @@ describe("Relay and TestTarget", function () {
         const Relay = await ethers.getContractFactory("Relay");
         const relay = await Relay.deploy({from: owner});
 
-        await relay.addRelayAddress(relayAddress1.address);
-        await relay.addRelayAddress(relayAddress2.address);
+        await relay.addValidator(relayAddress1.address);
+        await relay.addValidator(relayAddress2.address);
 
         const TestTarget = await ethers.getContractFactory("TestTarget");
         const testTarget = await TestTarget.deploy({from: owner});
@@ -129,6 +129,28 @@ describe("Relay and TestTarget", function () {
             );
 
             await expect(relayRequest2).to.be.revertedWith("Transaction already processed");
+        });
+
+
+        it("Does not accept signatures from the same validator", async function () {
+            const {relay, testTarget, relayAddress1} = await loadFixture(deployContracts);
+
+            const data = testTarget.interface.encodeFunctionData("testFunction", [ethers.encodeBytes32String("Test Data")]);
+            const expiration = (await ethers.provider.getBlock('latest')).timestamp + 120;
+
+            const messageHash = ethers.keccak256(
+                ethers.AbiCoder.defaultAbiCoder().encode(
+                    ['address', 'bytes', 'uint256'],
+                    [await testTarget.getAddress(), data, expiration],
+                ),
+            );
+            const signature1 = await relayAddress1.signMessage(ethers.getBytes(messageHash));
+
+            const relayRequest = relay.relayTransaction(
+                await testTarget.getAddress(), data, expiration, [signature1, signature1],
+            );
+
+            await expect(relayRequest).to.be.revertedWith("Signatures must be from different validators");
         });
     });
 });
